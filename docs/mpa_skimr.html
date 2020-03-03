@@ -1587,7 +1587,7 @@ div.tocify {
 <div id="table-mpa_mpa" class="section level2">
 <h2>Table <code>mpa_mpa</code></h2>
 <pre class="r"><code>source(here::here(&quot;functions.R&quot;))
-shelf(skimr)
+shelf(skimr, htmltools)
 
 flds_geo &lt;- dbListFields(con, &quot;mpa_mpa&quot;) %&gt;% str_subset(&quot;(geom)|(geog)&quot;)
 
@@ -2607,7 +2607,7 @@ skim(mpa_mpa)</code></pre>
 <pre class="r"><code>flds_chr &lt;- select_if(mpa_mpa, is_character) %&gt;% names() %&gt;% sort()
 
 top10 &lt;- function(df, fld_grp, n=10) {
-  # df = mpa_mpa; fld_grp = flds_chr[2]; n = 10
+  # df = mpa_mpa; fld_grp = &quot;notes&quot;; n = 10
   d &lt;- df %&gt;% 
     group_by_at(fld_grp) %&gt;% 
     rename(c(val = fld_grp)) %&gt;% 
@@ -2616,7 +2616,7 @@ top10 &lt;- function(df, fld_grp, n=10) {
     head(n) %&gt;% 
     mutate(
       txt = glue(
-        &quot;{str_sub(val, end = 50)}{ifelse(nchar(val) &gt; 50, '...', '')}: {n}&quot;))
+        &quot;{str_sub(str_trim(val), end = 50) %&gt;% htmlEscape()}{ifelse(nchar(val) &gt; 50, '...', '')}: {n}&quot;))
   paste(
     glue(&quot;`{fld_grp}`:\n\n-&quot;), 
     paste(d$txt, collapse = &quot;\n- &quot;), &quot;\n&quot;)
@@ -2963,17 +2963,16 @@ map_chr(flds_chr, top10, df = mpa_mpa) %&gt;%
 <p><code>notes</code>:</p>
 <ul>
 <li>: 21589</li>
-<li>Setting marine=0 and is_mpa=False because site is…: 1060</li>
-<li>US National System status: Member URL: <a href="http://www" class="uri">http://www</a>…: 114</li>
-<li>Classified as non-MPA based on US MPA Center indi…: 112</li>
-<li>Classified as non-MPA based on US MPA Center ind…: 107</li>
-<li></li>
+<li>Setting marine=0 and is_mpa=False because site is …: 1060</li>
+<li>US National System status: Member URL: <a href="http://www" class="uri">http://www</a>….: 114</li>
+<li>Classified as non-MPA based on US MPA Center indic…: 112</li>
+<li>Classified as non-MPA based on US MPA Center indic…: 107</li>
+<li>: 60</li>
+<li>US National System status: Member URL: <a href="http://www" class="uri">http://www</a>….: 34</li>
+<li>ORPHANED ZONE, please clean up.: 23</li>
+<li>US National System status: Member URL: <a href="http://www" class="uri">http://www</a>…: 16</li>
+<li>Classified as non-MPA based on US MPA Center indic…: 11</li>
 </ul>
-</div>
-</div>
-<div id="section" class="section level2">
-<h2>: 60</h2>
-<p>US National System status: Member URL: <a href="http://www" class="uri">http://www</a>…: 34 - ORPHANED ZONE, please clean up.: 23 - US National System status: Member URL: <a href="http://www" class="uri">http://www</a>…: 16 - Classified as non-MPA based on US MPA Center indic…: 11</p>
 <p><code>orig_name</code>:</p>
 <ul>
 <li>: 2944</li>
@@ -3181,20 +3180,11 @@ map_chr(flds_chr, top10, df = mpa_mpa) %&gt;%
 <ul>
 <li>NANA: 16020</li>
 <li>: 3875</li>
-<li><p>
-From: &lt;a href=&quot;<a href="http://philsciletters.org/2014/P" class="uri">http://philsciletters.org/2014/P</a>…: 68</li>
-<li><p>
-<b>Australia and nine off the coast of south-we…: 32</li>
-<li><p>
-Commercial Fishing Restricted. 
-</p></li>
+<li>&lt;p&gt;From: &lt;a href=&quot;<a href="http://philsciletters.org/2014/P" class="uri">http://philsciletters.org/2014/P</a>…: 68</li>
+<li>&lt;p&gt;&lt;b&gt;Australia and nine off the coast of south-we…: 32</li>
+<li>&lt;p&gt;Commercial Fishing Restricted.&amp;nbsp;&lt;/p&gt;</li>
 </ul>
-<p>
-…: 29 - This site is a designated Heritage Coast, a design…: 27 -
-<p>
-This site is a designated National Scenic Area,…: 25 -
-<p>
-<p><b>There are 13 Australian Marine Parks off the…: 22 - This site is a designated National Nature Reserve,…: 22 - &lt;p style=&quot;margin-bottom:.0001pt; margin:0in 0in 8p…: 18</p>
+<p>&lt;p&gt;…: 29 - This site is a designated Heritage Coast, a design…: 27 - &lt;p&gt;This site is a designated National Scenic Area,…: 25 - &lt;p&gt;&lt;b&gt;There are 13 Australian Marine Parks off the…: 22 - This site is a designated National Nature Reserve,…: 22 - &lt;p style=&quot;margin-bottom:.0001pt; margin:0in 0in 8p…: 18</p>
 <p><code>tertiary_conservation_focus</code>:</p>
 <ul>
 <li>Unknown: 22840</li>
@@ -3278,6 +3268,7 @@ This site is a designated National Scenic Area,…: 25 -
 <li>100837: 2</li>
 <li>101410: 2</li>
 </ul>
+</div>
 </div>
 
 

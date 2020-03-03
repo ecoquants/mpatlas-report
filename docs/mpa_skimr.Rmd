@@ -5,6 +5,7 @@ output:
     code_folding: hide
     toc: true
     toc_float: true
+    toc_depth: 3
 editor_options: 
   chunk_output_type: console
 ---
@@ -17,7 +18,7 @@ knitr::opts_chunk$set(echo = T, warning = F, message = F)
 
 ```{r, results='asis'}
 source(here::here("functions.R"))
-shelf(skimr)
+shelf(skimr, htmltools)
 
 flds_geo <- dbListFields(con, "mpa_mpa") %>% str_subset("(geom)|(geog)")
 
@@ -40,7 +41,7 @@ skim(mpa_mpa)
 flds_chr <- select_if(mpa_mpa, is_character) %>% names() %>% sort()
 
 top10 <- function(df, fld_grp, n=10) {
-  # df = mpa_mpa; fld_grp = flds_chr[2]; n = 10
+  # df = mpa_mpa; fld_grp = "notes"; n = 10
   d <- df %>% 
     group_by_at(fld_grp) %>% 
     rename(c(val = fld_grp)) %>% 
@@ -49,7 +50,7 @@ top10 <- function(df, fld_grp, n=10) {
     head(n) %>% 
     mutate(
       txt = glue(
-        "{str_sub(val, end = 50)}{ifelse(nchar(val) > 50, '...', '')}: {n}"))
+        "{str_sub(str_trim(val), end = 50) %>% htmlEscape()}{ifelse(nchar(val) > 50, '...', '')}: {n}"))
   paste(
     glue("`{fld_grp}`:\n\n-"), 
     paste(d$txt, collapse = "\n- "), "\n")
