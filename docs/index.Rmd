@@ -30,11 +30,13 @@ mpas <- read_csv(mpas_csv, col_types=cols()) %>%
 
 ### MPAs
 
-Let's take a look at just a subset of MPAs.
+Subset of MPAs:
 
 ```{r}
 datatable(mpas, escape = 1)
 ```
+
+- [skim `mpa_mpa` table](./mpa_skimr.html).
 
 ### AOIs
 

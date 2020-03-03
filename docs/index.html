@@ -3988,12 +3988,21 @@ mpas &lt;- read_csv(mpas_csv, col_types=cols()) %&gt;%
   mutate(
     mpa_name = glue(&quot;&lt;a href='./mpa_{mpa_id}.html'&gt;{mpa_name}&lt;/a&gt;&quot;)) %&gt;% 
   select(name = mpa_name, id = mpa_id, comments)</code></pre>
+<div id="campaigns" class="section level3">
+<h3>Campaigns</h3>
+</div>
 <div id="mpas" class="section level3">
 <h3>MPAs</h3>
-<p>Let’s take a look at just a subset of MPAs.</p>
+<p>Subset of MPAs:</p>
 <pre class="r"><code>datatable(mpas, escape = 1)</code></pre>
-<div id="htmlwidget-55e13c2337b7ad2daa3e" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-55e13c2337b7ad2daa3e">{"x":{"filter":"none","data":[["1","2","3","4"],["<a href='./mpa_68807929.html'>Chumash Heritage<\/a>","<a href='./mpa_301.html'>Great Barrier Reef<\/a>","<a href='./mpa_8338.html'>Papahānaumokuākea Marine National Monument<\/a>","<a href='./mpa_7705427.html'>Phoenix Islands<\/a>"],[68807929,301,8338,7705427],["Status: Proposed","Some No-Take Zones","No-Take Reserve, Platinum; spans dateline","No-Take Reserve"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>name<\/th>\n      <th>id<\/th>\n      <th>comments<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-ecf0ef28565d233e4535" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-ecf0ef28565d233e4535">{"x":{"filter":"none","data":[["1","2","3","4"],["<a href='./mpa_68807929.html'>Chumash Heritage<\/a>","<a href='./mpa_301.html'>Great Barrier Reef<\/a>","<a href='./mpa_8338.html'>Papahānaumokuākea Marine National Monument<\/a>","<a href='./mpa_7705427.html'>Phoenix Islands<\/a>"],[68807929,301,8338,7705427],["Status: Proposed","Some No-Take Zones","No-Take Reserve, Platinum; spans dateline","No-Take Reserve"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>name<\/th>\n      <th>id<\/th>\n      <th>comments<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":2},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<ul>
+<li><a href="./mpa_skimr.html">skim <code>mpa_mpa</code> table</a>.</li>
+</ul>
+</div>
+<div id="aois" class="section level3">
+<h3>AOIs</h3>
 </div>
 
 
