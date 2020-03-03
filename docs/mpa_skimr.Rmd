@@ -1,0 +1,63 @@
+---
+title: "MPAs skimr"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, warning = F, message = F)
+```
+
+## Table `mpa_mpa`
+
+```{r, results='asis'}
+source(here::here("functions.R"))
+shelf(skimr)
+
+flds_geo <- dbListFields(con, "mpa_mpa") %>% str_subset("(geom)|(geog)")
+
+cat(
+  "Skipping geographic fields in table `mpa_mpa`:\n\n- `", 
+  paste(flds_geo, collapse = "`\n- `"), "`")
+```
+
+```{r}
+mpa_mpa <- tbl(con, "mpa_mpa") %>%
+  select(-!!flds_geo) %>% 
+  collect()
+
+skim(mpa_mpa)
+```
+
+### Top 10 for character fields
+
+```{r, results='asis'}
+flds_chr <- select_if(mpa_mpa, is_character) %>% names() %>% sort()
+
+top10 <- function(df, fld_grp, n=10) {
+  # df = mpa_mpa; fld_grp = flds_chr[2]; n = 10
+  d <- df %>% 
+    group_by_at(fld_grp) %>% 
+    rename(c(val = fld_grp)) %>% 
+    summarize(n = n()) %>% 
+    arrange(desc(n)) %>% 
+    head(n) %>% 
+    mutate(
+      txt = glue(
+        "{str_sub(val, end = 50)}{ifelse(nchar(val) > 50, '...', '')}: {n}"))
+  paste(
+    glue("`{fld_grp}`:\n\n-"), 
+    paste(d$txt, collapse = "\n- "), "\n")
+}
+
+map_chr(flds_chr, top10, df = mpa_mpa) %>% 
+  paste(collpase = "\n\n") %>% 
+  cat()
+```
+
+

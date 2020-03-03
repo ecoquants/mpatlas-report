@@ -1,0 +1,84 @@
+---
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+editor_options: 
+  chunk_output_type: console
+params:
+  mpa_id: 8338
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, message = F, warning = F)
+
+source(here::here("functions.R"))
+
+shelf(flexdashboard)
+
+# set var for debug
+if (!exists("params")) params <- list(mpa_id = 8338)
+
+mpa <- get_mpa(params$mpa_id)
+#View(mpa)
+```
+
+---
+title: `r mpa$name`
+---
+
+Column {data-width=200}
+-----------------------------------------------------------------------
+
+### Status
+
+```{r}
+# https://www.w3schools.com/cssref/css_colors.asp
+# https://getbootstrap.com/docs/4.0/components/alerts/
+status_color <- c(
+  "Established"        = "success", 
+  "Designated"         = "success",
+  "Adopted"            = "success", 
+  "Proposed"           = "warning", 
+  "Inscribed"          = "warning", 
+  "Defunct/Degazetted" = "danger",
+  "Not Reported"       = "dark")
+
+valueBox(mpa$status, icon = "fa-check", color = status_color[mpa$status])
+```
+
+### Protection
+
+```{r}
+no_take_color <- c(
+  "All"            = "success",
+  "Part"           = "warning",
+  "None"           = "danger", 
+  "Not Reported"   = "dark", 
+  "Not Applicable" = "info") 
+valueBox(mpa$no_take, icon = "fa-leaf", color = no_take_color[mpa$no_take])
+```
+
+### Overview
+
+- TBD
+
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Map {data-height=350}
+
+```{r}
+leaflet(mpa) %>% 
+  addProviderTiles(providers$Esri.OceanBasemap) %>% 
+  addPolygons() %>% 
+  addMiniMap()
+```
+
+
+### Details
+
+```{r, results='asis'}
+cat(mpa$summary)
+```

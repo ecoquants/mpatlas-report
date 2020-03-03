@@ -1,0 +1,42 @@
+---
+title: "MPAtlas Reporting"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, warning = F, message = F)
+```
+
+```{r}
+library(librarian)
+shelf(tidyverse, here, glue, DT)
+
+mpas_csv <- here("data/mpas.csv")
+
+mpas <- read_csv(mpas_csv, col_types=cols()) %>% 
+  arrange(mpa_name) %>% 
+  mutate(
+    mpa_name = glue("<a href='./mpa_{mpa_id}.html'>{mpa_name}</a>")) %>% 
+  select(name = mpa_name, id = mpa_id, comments)
+```
+
+### Campaigns
+
+### MPAs
+
+Let's take a look at just a subset of MPAs.
+
+```{r}
+datatable(mpas, escape = 1)
+```
+
+### AOIs
+
+
+
