@@ -1,0 +1,45 @@
+---
+title: "mpa x eez"
+output:
+  html_document:
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, warning = F, message = F)
+```
+
+## eez x mpas
+
+```{r cars}
+source("functions.R") # sets up db con
+
+# preview eez table in RStudio without geom field
+# flds_not_geo <- setdiff(dbListFields(con, "eez"), "geom")
+# eez <- dbGetQuery(
+#   con, glue(
+#     "SELECT {paste(flds_not_geo, collapse=',')} FROM eez"))
+#View(eez)
+
+# execute eez x mpas intersection
+dbExecute(con, file2str("sql/eez_mpas.sql"))
+
+eez_mpas <- st_read(con, query = "SELECT * FROM eez_mpas;")
+
+mapview::mapview(eez_mpas)
+
+leaflet(eez_mpas) %>% 
+  addProviderTiles(providers$Esri.OceanBasemap) %>% 
+  addPolygons() %>% 
+  addMiniMap()
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
