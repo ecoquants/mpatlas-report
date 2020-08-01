@@ -1,0 +1,69 @@
+
+
+----
+Fri 31 Jul 2020 11:48:21 PM PDT
+\timing on
+Timing is on.
+-- overwrite intersection table
+DROP TABLE IF EXISTS eez_mpas CASCADE;
+NOTICE:  table "eez_mpas" does not exist, skipping
+DROP TABLE
+Time: 0.275 ms
+CREATE TABLE eez_mpas AS 
+SELECT m.mpa_id, e.fid, 
+  CASE WHEN 
+    ST_CoveredBy(m.geog, e.geom) 
+  THEN 
+    m.geog
+  ELSE 
+    ST_Multi(ST_Intersection(m.geog, e.geom)) 
+  END AS geom 
+FROM mpa_mpa AS m
+  INNER JOIN eez AS e
+  ON (
+    ST_Intersects(m.geog, e.geom) AND 
+    NOT ST_Touches(m.geog, e.geom) )
+WHERE
+  m.mpa_id = 68813321 AND 
+  e.sov = 'ARG';
+SELECT 2
+Time: 298.827 ms
+-- register geom
+SELECT Populate_Geometry_Columns('eez_mpas'::regclass::oid);
+ populate_geometry_columns 
+---------------------------
+                         1
+(1 row)
+
+Time: 68.504 ms
+-- calculate area
+ALTER TABLE eez_mpas ADD COLUMN IF NOT EXISTS area_km2 double precision;
+ALTER TABLE
+Time: 1.192 ms
+UPDATE eez_mpas SET area_km2=ROUND((ST_Area(geom::geography) / (1000*1000))::numeric,2);
+UPDATE 2
+Time: 19.105 ms
+
+
+##### eez_mpas.sql #####
+Fri 31 Jul 2020 11:51:00 PM PDT
+\timing on
+Timing is on.
+-- overwrite intersection table
+DROP TABLE IF EXISTS eez_mpas CASCADE;
+DROP TABLE
+Time: 2.061 ms
+CREATE TABLE eez_mpas AS 
+SELECT m.mpa_id, e.fid, 
+  CASE WHEN 
+    ST_CoveredBy(m.geog, e.geom) 
+  THEN 
+    m.geog
+  ELSE 
+    ST_Multi(ST_Intersection(m.geog, e.geom)) 
+  END AS geom 
+FROM mpa_mpa AS m
+  INNER JOIN eez AS e
+  ON (
+    ST_Intersects(m.geog, e.geom) AND 
+    NOT ST_Touches(m.geog, e.geom) );

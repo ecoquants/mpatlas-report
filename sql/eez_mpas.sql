@@ -13,10 +13,10 @@ FROM mpa_mpa AS m
   INNER JOIN eez AS e
   ON (
     ST_Intersects(m.geog, e.geom) AND 
-    NOT ST_Touches(m.geog, e.geom) )
-WHERE
-  m.mpa_id = 68813321 AND 
-  e.sov = 'ARG';
+    NOT ST_Touches(m.geog, e.geom) );
+-- WHERE
+--   m.mpa_id = 68813321 AND 
+--   e.sov = 'ARG';
 
 -- register geom
 SELECT Populate_Geometry_Columns('eez_mpas'::regclass::oid);

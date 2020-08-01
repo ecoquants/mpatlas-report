@@ -14,16 +14,42 @@ knitr::opts_chunk$set(echo = T, warning = F, message = F)
 ```{r cars}
 source("functions.R") # sets up db con
 
-# preview eez table in RStudio without geom field
-# flds_not_geo <- setdiff(dbListFields(con, "eez"), "geom")
-# eez <- dbGetQuery(
-#   con, glue(
-#     "SELECT {paste(flds_not_geo, collapse=',')} FROM eez"))
-#View(eez)
-
 # execute eez x mpas intersection
-dbExecute(con, file2str("sql/eez_mpas.sql"))
+system.time(
+  dbExecute(con, file2str("sql/eez_mpas.sql")))
 
+pgpass   <- readLines("/share/config/mpatlas4r.org_password.txt")
+path_sql <- here("sql/eez_mpas.sql")
+path_log <- here("sql/eez_mpas.log")
+
+cmd <- glue(
+  "PGPASSWD='{{pgpass}}'
+  { echo '\\timing on;'; 
+    cat '{{path_sql}}' } | psql -U admin -h postgis -d gis -a >>{{path_log}} 2>&1 &", 
+  .open = "{{", .close = "}}")
+cat(cmd)
+
+(printf "\n\n##### eez_mpas.sql #####\n"; echo `TZ='America/Los_Angeles' date`) >> '/share/github/mpatlas-report4r/sql/eez_mpas.log'
+( echo '\timing on'; cat '/share/github/mpatlas-report4r/sql/eez_mpas.sql' ) | psql -U admin -h postgis -d gis -a >>'/share/github/mpatlas-report4r/sql/eez_mpas.log' 2>&1 &
+
+TZ='America/Los_Angeles' date  
+
+psql -U admin -h postgis -d gis
+
+SELECT pid, query, * from pg_stat_activity WHERE state != 'idle' ORDER BY xact_start;
+SELECT pid from pg_stat_activity WHERE state != 'idle' ORDER BY xact_start;
+SELECT pid, query from pg_stat_activity WHERE state = 'idle' ORDER BY xact_start;
+select pg_terminate_backend(7518);
+
+# ~/.pgpass 
+#   hostname:port:database:username:password
+echo 'postgis:5432:gis:admin:MP@tlas!' > ~/.pgpass
+chmod 0600 ~/.pgpass
+echo 
+PGPASSWORD='MP@tlas!'; { echo '\timing on;'; cat '/share/github/mpatlas-report4r/sql/eez_mpas.sql' } | psql -U admin -h postgis -d gis -a >>/share/github/mpatlas-report4r/sql/eez_mpas.log 2>&1 &
+system(cmd)
+
+system2("echo", args = "$X", env = c("X=foobar;"))
 eez_mpas <- st_read(con, query = "SELECT * FROM eez_mpas;")
 
 mapview::mapview(eez_mpas)
@@ -34,3 +60,11 @@ leaflet(eez_mpas) %>%
   addMiniMap()
 ```
 
+```{r, eval=F}
+# preview eez table in RStudio without geom field
+flds_not_geo <- setdiff(dbListFields(con, "eez"), "geom")
+eez <- dbGetQuery(
+  con, glue(
+    "SELECT {paste(flds_not_geo, collapse=',')} FROM eez"))
+View(eez)
+```
