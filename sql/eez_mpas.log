@@ -67,3 +67,24 @@ FROM mpa_mpa AS m
   ON (
     ST_Intersects(m.geog, e.geom) AND 
     NOT ST_Touches(m.geog, e.geom) );
+SELECT 20671
+Time: 450637041.528 ms (5 d 05:10:37.042)
+-- WHERE
+--   m.mpa_id = 68813321 AND 
+--   e.sov = 'ARG';
+-- register geom
+SELECT Populate_Geometry_Columns('eez_mpas'::regclass::oid);
+WARNING:  Could not convert 'geom' in 'public.eez_mpas' to use typmod with srid 4326, type MultiPolygon: Geometry type (GeometryCollection) does not match column type (MultiPolygon)
+ populate_geometry_columns 
+---------------------------
+                         0
+(1 row)
+
+Time: 4914.826 ms (00:04.915)
+-- calculate area
+ALTER TABLE eez_mpas ADD COLUMN IF NOT EXISTS area_km2 double precision;
+ALTER TABLE
+Time: 2.014 ms
+UPDATE eez_mpas SET area_km2=ROUND((ST_Area(geom::geography) / (1000*1000))::numeric,2);
+UPDATE 20671
+Time: 45030.213 ms (00:45.030)
