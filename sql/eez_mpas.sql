@@ -1,7 +1,7 @@
 -- overwrite intersection table
 DROP TABLE IF EXISTS eez_mpas CASCADE;
 CREATE TABLE eez_mpas AS 
-SELECT m.mpa_id, e.fid, 
+SELECT m.mpa_id, e.fid AS eez_fid, 
   CASE WHEN 
     ST_CoveredBy(m.geog, e.geom) 
   THEN 
@@ -17,6 +17,14 @@ FROM mpa_mpa AS m
 -- WHERE
 --   m.mpa_id = 68813321 AND 
 --   e.sov = 'ARG';
+
+-- excise intersections that aren't polygons into eez_mpa_notpoly
+DROP TABLE IF EXISTS eez_mpa_notpoly CASCADE;
+CREATE TABLE eez_mpa_notpoly AS
+SELECT *
+FROM eez_mpas 
+WHERE ST_GeometryType(geom) != 'ST_MultiPolygon';
+DELETE FROM eez_mpas WHERE ST_GeometryType(geom) != 'ST_MultiPolygon';
 
 -- register geom
 SELECT Populate_Geometry_Columns('eez_mpas'::regclass::oid);

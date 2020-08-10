@@ -3,61 +3,108 @@ title: "EEZ MPAs"
 output:
   html_document:
     code_folding: show
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = T, warning = F, message = F)
 ```
 
+## db setup (once)
+
+Add password (`S3cretP@asswordHERE!` not actual) into connection file `~/.pgpass` in specific format (`hostname:port:database:username:password`) for admin user:
+
+```
+# format of .pgpass: 
+echo 'postgis:5432:gis:admin:S3cretP@asswordHERE!' > ~/.pgpass
+chmod 0600 ~/.pgpass
+```
+
 ## eez x mpas
 
-```{r cars}
+```{r}
 source("functions.R") # sets up db con
 
-# execute eez x mpas intersection
-system.time(
-  dbExecute(con, file2str("sql/eez_mpas.sql")))
+library(knitr)
+```
 
-pgpass   <- readLines("/share/config/mpatlas4r.org_password.txt")
+
+Run sql query `eez_mpas.sql`:
+
+```{r, eval=F}
+# OLD SLOW: execute eez x mpas intersection
+#system.time(
+#  dbExecute(con, file2str("sql/eez_mpas.sql")))
+
 path_sql <- here("sql/eez_mpas.sql")
 path_log <- here("sql/eez_mpas.log")
 
 cmd <- glue(
-  "PGPASSWD='{{pgpass}}'
-  { echo '\\timing on;'; 
-    cat '{{path_sql}}' } | psql -U admin -h postgis -d gis -a >>{{path_log}} 2>&1 &", 
+  "
+  (printf '\n\n##### eez_mpas.sql #####\n'; echo `TZ='America/Los_Angeles' date`) >> '{{path_log}}'
+  ( echo '\\timing on;'; cat '{{path_sql}}' }) | psql -U admin -h postgis -d gis -a >>{{path_log}} 2>&1 &", 
   .open = "{{", .close = "}}")
 cat(cmd)
-
-(printf "\n\n##### eez_mpas.sql #####\n"; echo `TZ='America/Los_Angeles' date`) >> '/share/github/mpatlas-report4r/sql/eez_mpas.log'
-( echo '\timing on'; cat '/share/github/mpatlas-report4r/sql/eez_mpas.sql' ) | psql -U admin -h postgis -d gis -a >>'/share/github/mpatlas-report4r/sql/eez_mpas.log' 2>&1 &
-
-TZ='America/Los_Angeles' date  
-
-psql -U admin -h postgis -d gis
-
-SELECT pid, query, * from pg_stat_activity WHERE state != 'idle' ORDER BY xact_start;
-SELECT pid from pg_stat_activity WHERE state != 'idle' ORDER BY xact_start;
-SELECT pid, query from pg_stat_activity WHERE state = 'idle' ORDER BY xact_start;
-select pg_terminate_backend(7518);
-
-# ~/.pgpass 
-#   hostname:port:database:username:password
-echo 'postgis:5432:gis:admin:MP@tlas!' > ~/.pgpass
-chmod 0600 ~/.pgpass
-echo 
-PGPASSWORD='MP@tlas!'; { echo '\timing on;'; cat '/share/github/mpatlas-report4r/sql/eez_mpas.sql' } | psql -U admin -h postgis -d gis -a >>/share/github/mpatlas-report4r/sql/eez_mpas.log 2>&1 &
 system(cmd)
+```
 
-system2("echo", args = "$X", env = c("X=foobar;"))
-eez_mpas <- st_read(con, query = "SELECT * FROM eez_mpas;")
+Before fix:
 
+|   cnt|geom_type             |
+|-----:|:---------------------|
+|     4|ST_MultiLineString    |
+|     5|ST_GeometryCollection |
+| 20662|ST_MultiPolygon       |
+
+Now:
+
+```{sql connection=con, output.var="eez_mpas_geomtypes"}
+SELECT COUNT(eez_fid) AS cnt, ST_GeometryType(geom) AS geom_type
+FROM eez_mpas GROUP BY ST_GeometryType(geom);
+```
+
+```{r}
+kable(eez_mpas_geomtypes)
+```
+
+
+```{r}
+eez_mpas <- st_read(con, query = "SELECT * FROM eez_mpas LIMIT 10;")
+class(eez_mpas) # "sf" "data.frame" # only "data.frame" if using con as OdbcConnection
 mapview::mapview(eez_mpas)
 
 leaflet(eez_mpas) %>% 
   addProviderTiles(providers$Esri.OceanBasemap) %>% 
   addPolygons() %>% 
   addMiniMap()
+```
+
+
+## debug sql processes
+
+```bash
+# check if still running query
+ps -eaf | grep psql
+
+# log into database
+psql -U admin -h postgis -d gis
+```
+
+### kill process 
+
+```sql
+-- show not idle, all info
+SELECT pid, query, * from pg_stat_activity WHERE state != 'idle' ORDER BY xact_start;
+
+-- show not idle, just pid
+SELECT pid from pg_stat_activity WHERE state != 'idle' ORDER BY xact_start;
+
+-- show idle
+SELECT pid, query from pg_stat_activity WHERE state = 'idle' ORDER BY xact_start;
+
+-- kill by process id (pid)
+SELECT pg_terminate_backend(7518);
 ```
 
 ```{r, eval=F}

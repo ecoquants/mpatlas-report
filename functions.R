@@ -14,14 +14,14 @@ shelf(
 
 # connection to database
 
-# pwd <- readLines("/share/config/mpatlas4r.org_password.txt")
-# con <- DBI::dbConnect(
-#   RPostgres::Postgres(),
-#   dbname   = "gis",
-#   host     = "postgis",
-#   port     = 5432,
-#   user     = "admin",
-#   password = pwd)
+pwd <- readLines("/share/config/mpatlas4r.org_password.txt")
+con <- DBI::dbConnect(
+  RPostgres::Postgres(),
+  dbname   = "gis",
+  host     = "postgis",
+  port     = 5432,
+  user     = "admin",
+  password = pwd)
 
 con <- dbConnect(
   odbc::odbc(), "mpatlas")
