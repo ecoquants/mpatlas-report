@@ -1,10 +1,6 @@
 ---
 title: "EEZ MPAs"
-output:
-  html_document:
-    code_folding: show
-editor_options: 
-  chunk_output_type: console
+output: html_notebook
 ---
 
 ```{r setup, include=FALSE}
@@ -78,6 +74,14 @@ leaflet(eez_mpas) %>%
   addProviderTiles(providers$Esri.OceanBasemap) %>% 
   addPolygons() %>% 
   addMiniMap()
+```
+
+## redo
+
+```{sql connection=con, output.var="eez_rename_old"}
+ALTER TABLE eez RENAME TO eez_old;
+ALTER TABLE eez_mpas RENAME TO eez_mpas_old;
+ALTER TABLE eez_mpa_notpoly RENAME TO eez_mpa_notpoly_old;
 ```
 
 
